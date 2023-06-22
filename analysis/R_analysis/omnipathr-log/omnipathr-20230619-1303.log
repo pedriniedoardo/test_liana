@@ -1,0 +1,31 @@
+[2023-06-19 13:03:26] [INFO]    [OmnipathR] Welcome to OmnipathR!
+[2023-06-19 13:03:26] [TRACE]   [OmnipathR] Reading JSON from `/home/edo/.cache/OmnipathR/cache.json` (encoding: UTF-8).
+[2023-06-19 13:03:26] [TRACE]   [OmnipathR] JSON validation successful: TRUE
+[2023-06-19 13:03:26] [INFO]    [OmnipathR] Initialized cache: `/home/edo/.cache/OmnipathR`.
+[2023-06-19 13:03:26] [TRACE]   [OmnipathR] Reading JSON from `/home/edo/.cache/R/renv/cache/v5/R-4.2/x86_64-conda-linux-gnu/OmnipathR/3.9.6/6149f493e4d044353b438b283864b3e8/OmnipathR/db/db_def.json` (encoding: UTF-8).
+[2023-06-19 13:03:26] [TRACE]   [OmnipathR] JSON validation successful: TRUE
+[2023-06-19 13:03:26] [TRACE]   [OmnipathR] Reading JSON from `/home/edo/.cache/R/renv/cache/v5/R-4.2/x86_64-conda-linux-gnu/OmnipathR/3.9.6/6149f493e4d044353b438b283864b3e8/OmnipathR/internal/magic_bytes.json` (encoding: UTF-8).
+[2023-06-19 13:03:26] [TRACE]   [OmnipathR] JSON validation successful: TRUE
+[2023-06-19 13:03:26] [TRACE]   [OmnipathR] Reading JSON from `/home/edo/.cache/R/renv/cache/v5/R-4.2/x86_64-conda-linux-gnu/OmnipathR/3.9.6/6149f493e4d044353b438b283864b3e8/OmnipathR/internal/urls.json` (encoding: UTF-8).
+[2023-06-19 13:03:26] [TRACE]   [OmnipathR] JSON validation successful: TRUE
+[2023-06-19 13:03:26] [TRACE]   [OmnipathR] Reading JSON from `/home/edo/.cache/R/renv/cache/v5/R-4.2/x86_64-conda-linux-gnu/OmnipathR/3.9.6/6149f493e4d044353b438b283864b3e8/OmnipathR/internal/id_types.json` (encoding: UTF-8).
+[2023-06-19 13:03:26] [TRACE]   [OmnipathR] JSON validation successful: TRUE
+[2023-06-19 15:03:41] [TRACE]   [OmnipathR] Reading JSON from `https://omnipathdb.org/resources` (encoding: UTF-8).
+[2023-06-19 15:03:41] [TRACE]   [OmnipathR] JSON validation successful: TRUE
+[2023-06-19 15:03:41] [TRACE]   [OmnipathR] Reading JSON from `https://omnipathdb.org/resources` (encoding: UTF-8).
+[2023-06-19 15:03:41] [TRACE]   [OmnipathR] JSON validation successful: TRUE
+[2023-06-19 15:03:41] [INFO]    [OmnipathR] Cache record does not exist: `https://omnipathdb.org/annotations?resources=PROGENy&license=academic`
+[2023-06-19 15:03:41] [INFO]    [OmnipathR] Retrieving URL: `https://omnipathdb.org/annotations?resources=PROGENy&license=academic`
+[2023-06-19 15:03:41] [TRACE]   [OmnipathR] Attempt 1/3: `https://omnipathdb.org/annotations?resources=PROGENy&license=academic`
+[2023-06-19 15:03:44] [TRACE]   [OmnipathR] Reading JSON from `/home/edo/.cache/OmnipathR/cache.json` (encoding: UTF-8).
+[2023-06-19 15:03:44] [TRACE]   [OmnipathR] JSON validation successful: TRUE
+[2023-06-19 15:03:44] [TRACE]   [OmnipathR] Reading JSON from `/home/edo/.cache/OmnipathR/cache.json` (encoding: UTF-8).
+[2023-06-19 15:03:44] [TRACE]   [OmnipathR] JSON validation successful: TRUE
+[2023-06-19 15:03:44] [INFO]    [OmnipathR] Cache item `3492392585ba05414edfae46801492076437d7e7` version 1: status changed from `unknown` to `started`.
+[2023-06-19 15:03:44] [TRACE]   [OmnipathR] Exporting object to RDS: `/home/edo/.cache/OmnipathR/3492392585ba05414edfae46801492076437d7e7-1.rds`.
+[2023-06-19 15:03:46] [TRACE]   [OmnipathR] Exported RDS to `/home/edo/.cache/OmnipathR/3492392585ba05414edfae46801492076437d7e7-1.rds`.
+[2023-06-19 15:03:46] [INFO]    [OmnipathR] Download ready [key=3492392585ba05414edfae46801492076437d7e7, version=1]
+[2023-06-19 15:03:46] [TRACE]   [OmnipathR] Reading JSON from `/home/edo/.cache/OmnipathR/cache.json` (encoding: UTF-8).
+[2023-06-19 15:03:46] [TRACE]   [OmnipathR] JSON validation successful: TRUE
+[2023-06-19 15:03:46] [INFO]    [OmnipathR] Cache item `3492392585ba05414edfae46801492076437d7e7` version 1: status changed from `started` to `ready`.
+[2023-06-19 15:03:46] [SUCCESS] [OmnipathR] Downloaded 700239 annotation records.

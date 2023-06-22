@@ -1,0 +1,201 @@
+# liana: Intro ------------------------------------------------------------
+# The continuous developments of single-cell RNA-Seq (scRNA-Seq) have sparked an immense interest in understanding intercellular crosstalk. Multiple tools and resources that aid the investigation of cell-cell communication (CCC) were published recently. However, these methods and resources are usually in a fixed combination of a tool and its corresponding resource, but in principle any resource could be combined with any method.
+
+# To this end, we built liana - a framework to decouple the tools from their corresponding resources.
+
+# Load required packages --------------------------------------------------
+library(tidyverse)
+library(magrittr)
+library(liana)
+library(circlize)
+
+# CCC Resources -----------------------------------------------------------
+# liana provides CCC resources obtained and formatted via OmnipathR which are then converted to the appropriate format to each method.
+
+# Resource currently included in OmniPathR (and hence `liana`) include:
+show_resources()
+
+# A list of resources can be obtained using the `select_resource()` function:
+# See `?select_resource()` documentation for further information.
+# select_resource(c('OmniPath')) %>% dplyr::glimpse() 
+
+# CCC Methods -------------------------------------------------------------
+# Each of the resources can then be run with any of the following methods:
+  
+# Resource currently included in OmniPathR (and hence `liana`) include:
+show_methods()
+
+# Note that the different algorithms (or scoring measures) used in sca, natmi, connectome, cellphonedb, cytotalk’s crosstalk scores, and logfc were re-implemented in LIANA. Yet, the original method pipelines can be called via the call_* functions.
+
+# liana wrapper function --------------------------------------------------
+# To run liana, we will use a down-sampled toy HUMAN PBMCs scRNA-Seq data set, obtained from SeuratData.
+
+# liana takes Seurat and SingleCellExperiment objects as input, containing processed counts and clustered cells.
+
+liana_path <- system.file(package = "liana")
+testdata <-
+  readRDS(file.path(liana_path , "testdata", "input", "testdata.rds"))
+
+testdata %>% dplyr::glimpse()
+
+# liana_wrap calls a number of methods and and each method is run with the provided resource(s).
+# We will now call all methods that are currently available in liana.
+# Here we use only the Consensus (Default) CCC resource, but any of the aforementioned ones (available via show_resources()) can be added to the resource parameter
+
+# Run liana
+liana_test <- liana_wrap(testdata)
+
+# Liana returns a list of results, each element of which corresponds to a method
+liana_test %>% dplyr::glimpse()
+
+# LIANA currently provides a mixture of re-implemented methods and pipelines which externally call specific LR methods. By default, LIANA will call only the internal scoring function, i.e. those that are re-implemented in LIANA.
+
+# One can use LIANA to also run the original methods. For more about the original methods see LIANA++.
+
+# Aggregate and Obiain Consensus Ranks ------------------------------------
+# liana also provides consensus ranks for the results obtained using different methods. By default, liana will provide mean, median, and aggregate* consensus ranks
+
+# We can aggregate these results into a tibble with consensus ranks
+liana_test <- liana_test %>%
+  liana_aggregate()
+
+dplyr::glimpse(liana_test)
+
+# Voila! That’s it. A very brief intro to LIANA and how to obtain the scoring functions† for each method implemented in it, as well as an aggregate_rank* which serves as a consensus across methods.
+
+# (†) Note that here we focus on the scores recommended to be used to prioritize interaction in a single sample system. Most of these, with the exception of SingleCellSignalR’s LRscore, take the specificity of the cluster pair into account.
+
+# (*) The aggregate consensus rank (aggregate_rank) is obtained using a re-implementation of the RRA method from the RobustRankAggreg package.
+
+# RRA scores can be interpreted as p-values and interactions which are ranked consistently higher than random are assigned low scores/p-values.
+
+# Simple DotPlot ----------------------------------------------------------
+# We will now plot the results. By default, we use the LRscore from SingleCellSignalR to represent the magnitude of expression of the ligand and receptor, and NATMI’s specificity weights to show how specific a given interaction is to the source(L) and target(R) cell types.
+
+# Note that the top 20 interactions (ntop), are defined as unique ligand-receptors ordered consequentially, regardless of the cell types. Done subsequent to filtering to the source_groups and target_groups of interest. In this case, we plot interactions in which B cells are the source (express the ~ligands) and the other 3 cell types are the target cell types (those which express the ~receptors).
+
+# By default, liana_aggregate would order LIANA’s output according to rank_aggregate in ascending order.
+
+# Note that using liana_dotplot /w ntop assumes that liana’s results are ranked accordingly! Refer to rank_method, if you wish to easily rank interactions for a single method (see example below).
+
+liana_test %>%
+  liana_dotplot(source_groups = c("B"),
+                target_groups = c("NK", "CD8 T", "B"),
+                ntop = 20)
+
+# Note that missing dots are interactions which are not expressed in at least 10% of the cells (by default) in both cell clusters.
+
+# In this case, we consider the specificity of interactions as defined by NATMI’s edge specificity weights. NATMI’s specificity edges range from 0 to 1, where 1 means both the ligand and receptor are uniquely expressed in a given pair of cells. Expression magnitude, represented by SingleCellExperiment’s LRScore, is on the other hand, meant to represent a non-negative regularized score, comparable between datasets.
+
+# Frequency Heatmap -------------------------------------------------------
+# We will now plot the frequencies of interactions for each pair of potentially communicating cell types.
+
+# This heatmap was inspired by CellChat’s and CellPhoneDB’s heatmap designs.
+
+# First, we filter interactions by aggregate_rank, which can itself be treated as a p-value of for the robustly, highly ranked interactions. Nevertheless, one can also filter according to CPDB’s p-value (<=0.05) or SingleCellExperiments LRScore, etc.
+
+liana_trunc <- liana_test %>%
+  # only keep interactions concordant between methods
+  filter(aggregate_rank <= 0.01) # note that these pvals are already corrected
+
+heat_freq(liana_trunc)
+
+# Here, we see that NK-CD8 T share a relatively large number of the inferred interactions, with many of those being send from NK - note large sum of interactions (gray barplot) in which NK is the Sender.
+
+# NB! Here, an assumption is implied that the number of interactions inferred between cell types is informative of the communication events occurring in the system. This is a rather strong assumption that one should consider prior to making any conclusions. Our suggestion is that any conclusions should be complimented with further information, such as biological prior knowledge, spatial information, etc.
+
+# Frequency Chord diagram -------------------------------------------------
+# Here, we will generate a chord diagram equivalent to the frequencies heatmap.
+# First, make sure you have the circlize package installed.
+# In this case, one could choose the source and target cell type groups that they wish to plot.
+p <- chord_freq(liana_trunc,
+                source_groups = c("CD8 T", "NK", "B"),
+                target_groups = c("CD8 T", "NK", "B"))
+
+# For more advanced visualization options, we kindly refer the user to SCPubr.
+
+# Run any method of choice. -----------------------------------------------
+# We will now run only the CellPhoneDB’s permutation-based algorithm. We will also lower the number of permutations that we wish to perform for the sake of computational time. Note that one can also parallelize the CPDB algorithm implemented in LIANA (in this case we don’t, as this would only make sense when working with large datasets).
+
+# Also, here we will use a SingleCellExperiment object as input. In reality, LIANA converts Seurat objects to SingleCellExperiment and is to a large extend based on the BioConductor single-cell infrastructure.
+
+# Load Sce testdata
+sce <- readRDS(file.path(liana_path , "testdata", "input", "testsce.rds"))
+
+# RUN CPDB alone
+cpdb_test <- liana_wrap(sce,
+                        method = 'cellphonedb',
+                        resource = c('CellPhoneDB'),
+                        permutation.params = list(nperms=100,
+                                                  parallelize=FALSE,
+                                                  workers=4),
+                        expr_prop=0.05)
+
+# identify interactions of interest
+cpdb_int <- cpdb_test %>%
+  # only keep interactions with p-val <= 0.05
+  filter(pvalue <= 0.05) %>% # this reflects interactions `specificity`
+  # then rank according to `magnitude` (lr_mean in this case)
+  rank_method(method_name = "cellphonedb",
+              mode = "magnitude") %>%
+  # keep top 20 interactions (regardless of cell type)
+  distinct_at(c("ligand.complex", "receptor.complex")) %>%
+  head(20)
+
+# Plot toy results
+cpdb_test %>%
+  # keep only the interactions of interest
+  inner_join(cpdb_int, 
+             by = c("ligand.complex", "receptor.complex")) %>%
+  # invert size (low p-value/high specificity = larger dot size)
+  # + add a small value to avoid Infinity for 0s
+  mutate(pvalue = -log10(pvalue + 1e-10)) %>% 
+  liana_dotplot(source_groups = c("c"),
+                target_groups = c("c", "a", "b"),
+                specificity = "pvalue",
+                magnitude = "lr.mean",
+                show_complex = TRUE,
+                size.label = "-log10(p-value)")
+
+
+# SingleCellSignalR, CytoTalk, NATMI, and Connectome scores /w Com --------
+# SingleCellSignalR, CytoTalk, NATMI, and Connectome scores /w Complexes
+
+# The re-implementation of the aforementioned methods in LIANA enables us to make use of multimeric complex information as provided by the e.g. CellPhoneDB, CellChatDB, and ICELLNET resources
+
+# Run liana re-implementations with the CellPhoneDB resource
+complex_test <- liana_wrap(testdata,
+                           method = c('natmi', 'sca', 'logfc'),
+                           resource = c('CellPhoneDB'))
+
+complex_test %>% liana_aggregate()
+
+# Call liana with overwritten default settings ----------------------------
+# By default liana is run with the default for each method which can be obtained via liana_default()
+
+# Alternatively, one can also overwrite the default settings by simply passing them to the liana wrapper function
+
+# define geometric mean
+geometric_mean <- function(vec){exp(mean(log(vec)))}
+
+# Overwrite default parameters by providing a list of parameters
+liana_test <- liana_wrap(testdata,
+                         method = c('cellphonedb', 'sca'),
+                         resource = 'Consensus',
+                         permutation.params = 
+                           list(
+                             nperms = 10 # here we run cpdb it only with 10 permutations
+                           ),
+                         complex_policy="geometric_mean"
+)
+
+# This returns a list of results for each method
+liana_test %>% dplyr::glimpse()
+
+# Note that with liana_call.params one can change the way that we account for complexes. By default this is set to the mean of the subunits in the complex (as done for expression in CellPhoneDB/Squidpy), and it would return the subunit closest to the mean.
+
+# Here we change it to the geometric_mean, but any alternative function can be passed and other perfectly viable approaches could also include e.g. the Trimean of CellChat.
+
+# Please refer to the ?liana_wrap documentation for more information on all the parameters that can be tuned in liana. Also, one can obtain a list with all default parameters by calling the liana_defaults() function.
+liana_defaults()
+Citation

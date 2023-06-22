@@ -1,0 +1,26 @@
+--------- file content ------- 
+# Reproducible data folder: 
+data/
+out/ 
+# pypette reproducible inputs:  
+samples/ 
+genomes/ 
+pypette/ 
+jobs/ 
+.snakemake/ 
+clip/ 
+adapters/ 
+# files extensions  
+*.*DS_Store 
+*.bam 
+*.fastq.gz 
+*.bw 
+*.xlsx 
+# R results – if you have custom R scripts 
+*.RData 
+*.rds 
+# Other repository to ignore  
+logs_slurm/ 
+logs/
+renv/
+.Rproj.user
